@@ -57,6 +57,7 @@ public:
     cb->fileName = __FILE__;
     cb->lineno   = __LINE__;
 #endif
+    printf("insert1\n");
     cbQ.insert(cb, globalClock + delta);
   }
 
@@ -75,10 +76,12 @@ public:
     cb->fileName = __FILE__;
     cb->lineno   = __LINE__;
 #endif
+    printf("insert2\n");
     cbQ.insert(cb, tim);
   }
 
   static void advanceClock() {
+    printf("advanced clock\n");
     EventScheduler *cb;
 
 #ifndef NDEBUG

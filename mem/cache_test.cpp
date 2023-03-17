@@ -325,6 +325,7 @@ protected:
 // cache reads it from memory, then that cache gets set to Exclusive
 
 TEST_F(CacheTest, l1miss_l2miss) {
+  printf("l1miss_l2miss");
   doread(p0dl1, 0x100);  // L1 miss, L2 miss
   waitAllMemOpsDone();
   EXPECT_EQ(Exclusive, getState(p0dl1, 0x100));
@@ -338,9 +339,11 @@ TEST_F(CacheTest, l1miss_l2miss) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0x100));
   }
+  printf("\n\n");
 }
 
 TEST_F(CacheTest, L1miss_l2hit) {
+  printf("L1miss_l2hit");
   doread(p0l2, 0x180);  // L2 miss
   waitAllMemOpsDone();
   EXPECT_EQ(Invalid, getState(p0dl1, 0x180));
@@ -366,9 +369,11 @@ TEST_F(CacheTest, L1miss_l2hit) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0x180));
   }
+  printf("\n\n");
 }
 
 TEST_F(CacheTest, multiple_reqs) {
+  printf("multiple_reqs");
   // Setup, L2 line (empty in all the others)
   doread(p0l2, 0xF000);  // L2 miss
   waitAllMemOpsDone();
@@ -413,11 +418,13 @@ TEST_F(CacheTest, multiple_reqs) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0xF000));
   }
+  printf("\n\n");
 }
 
 // the second test checks that if one cache reads a line and then
 // a second cache reads that line,  both become shared
 TEST_F(CacheTest, Shared_second_test) {
+  printf("Shared_second_test");
   doread(p0dl1, 0x200);
   waitAllMemOpsDone();
   doread(p1dl1, 0x200);
@@ -447,12 +454,14 @@ TEST_F(CacheTest, Shared_second_test) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0x200));
   }
+  printf("\n\n");
 }
 
 // in the third test, a cache has a write miss that no one else has, and we check if
 // the state of that cache goes to modified
 
 TEST_F(CacheTest, Modified_third_test) {
+  printf("Modified_third_test");
   dowrite(p0dl1, 0x300);
   waitAllMemOpsDone();
   EXPECT_EQ(Modified, getState(p0dl1, 0x300));
@@ -465,6 +474,7 @@ TEST_F(CacheTest, Modified_third_test) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0x300));
   }
+  printf("\n\n");
 }
 
 // in the fourth test, a cache reads from memory and becomes exclusive,
@@ -473,6 +483,7 @@ TEST_F(CacheTest, Modified_third_test) {
 // currently this test fails, and it stays at exclusive
 //
 TEST_F(CacheTest, Modified_fourth_test) {
+  printf("Modified_fourth_test");
   doread(p0dl1, 0x400);
   waitAllMemOpsDone();
   dowrite(p0dl1, 0x400);
@@ -486,6 +497,7 @@ TEST_F(CacheTest, Modified_fourth_test) {
   if (l3) {
     EXPECT_EQ(Exclusive, getState(l3, 0x400));
   }
+  printf("\n\n");
 }
 
 // in the fifth test, a cache has a write miss and goes to modified, then
@@ -493,6 +505,7 @@ TEST_F(CacheTest, Modified_fourth_test) {
 // second becomes shared
 //
 TEST_F(CacheTest, Owner_fifth_test) {
+  printf("Owner_fifth_test");
   dowrite(p0dl1, 0x500);
   waitAllMemOpsDone();
   doread(p1dl1, 0x500);
@@ -524,6 +537,7 @@ TEST_F(CacheTest, Owner_fifth_test) {
       EXPECT_EQ(Modified, getState(l3, 0x500));
     }
   }
+  printf("\n\n");
 }
 
 // in the sixth test, a cache has a read miss, then the other

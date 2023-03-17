@@ -11,7 +11,8 @@
 #endif
 
 class MemRequest {
-private:
+  public:
+//private:
   void setNextHop(MemObj *m);
   void startReq();
   void startReqAck();
@@ -25,7 +26,7 @@ private:
   static pool<MemRequest> actPool;
   friend class pool<MemRequest>;
   // }}}
-protected:
+//protected:
   /* MsgType declarations {{{1 */
   enum MsgType { mt_req, mt_reqAck, mt_setState, mt_setStateAck, mt_disp };
 
@@ -271,6 +272,16 @@ public:
     return mreq;
   }
 
+  static MemRequest *createReqRead(MemObj *m, bool keep_stats, Addr_t addr, Addr_t pc, Time_t startClock, CallbackBase *cb = 0) {
+    MemRequest *mreq = create(m, addr, keep_stats, cb);
+    mreq->mt         = mt_req;
+    mreq->ma         = ma_setValid;  // For reads, MOES are valid states
+    mreq->ma_orig    = mreq->ma;
+    mreq->pc         = pc;
+    mreq->startClock = startClock;
+    return mreq;
+  }
+
   static void triggerReqRead(MemObj *m, bool keep_stats, Addr_t trig_addr, Addr_t pc, Addr_t _dep_pc, Addr_t _start_addr,
                              Addr_t _end_addr, int64_t _delta, int64_t _inf, int _ld_br_type, int _depth, int tl_type,
                              bool _ld_used, CallbackBase *cb = 0) {
@@ -290,6 +301,10 @@ public:
 
   static void sendReqRead(MemObj *m, bool keep_stats, Addr_t addr, Addr_t pc, CallbackBase *cb = 0) {
     MemRequest *mreq = createReqRead(m, keep_stats, addr, pc, cb);
+    m->req(mreq);
+  }
+  static void sendReqRead(MemObj *m, bool keep_stats, Addr_t addr, Addr_t pc, Time_t startClock, CallbackBase *cb = 0) {
+    MemRequest *mreq = createReqRead(m, keep_stats, addr, pc, startClock, cb);
     m->req(mreq);
   }
   static void sendSpecReqDL1Read(MemObj *m, bool keep_stats, Addr_t addr, Addr_t pc, Dinst *dinst, CallbackBase *cb) {

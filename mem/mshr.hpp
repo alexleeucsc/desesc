@@ -3,6 +3,7 @@
 #pragma once
 
 #include <queue>
+#include <list>
 
 #include "callback.hpp"
 #include "dinst.hpp"
@@ -48,6 +49,7 @@ protected:
   class EntryType {
   public:
     CallbackContainer cc;
+    Time_t startClock;
     int32_t           nUse;
 #ifndef NDEBUG
     std::deque<MemRequest *> pending_mreq;
@@ -55,15 +57,16 @@ protected:
 #endif
   };
 
-  std::vector<EntryType> entry;
+  std::vector<std::list<EntryType>> entry;
 
 public:
   MSHR(const std::string &name, int32_t size, int16_t lineSize, int16_t nSubEntries);
   virtual ~MSHR() {}
   bool hasFreeEntries() const { return (nFreeEntries > 0); }
 
-  bool canAccept(Addr_t paddr) const;
-  bool canIssue(Addr_t addr) const;
+  bool canAccept(Addr_t paddr, Time_t startClock) const;
+  //bool canIssue(Addr_t addr, Addr_t pc) const;
+  bool canIssue(Addr_t addr, Time_t startClock) const;
   void addEntry(Addr_t addr, CallbackBase *c, MemRequest *mreq);
   void blockEntry(Addr_t addr, MemRequest *mreq);
   bool retire(Addr_t addr, MemRequest *mreq);

@@ -19,3 +19,14 @@ cc_library(
     ]
 )
 
+cc_test(
+    name = "store_buffer_test",
+    srcs = [
+        "store_buffer_test.cpp",
+    ],
+    deps = [
+        ":simu",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+

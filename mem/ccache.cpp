@@ -349,7 +349,7 @@ CCache::Line *CCache::allocateLine(Addr_t addr, MemRequest *mreq) {
       int    nMiss     = 0;
 
       for (int i = 0; i < (1024 >> lineSizeBits); i++) {
-        if (!mshr->canIssue(page_addr + lineSize * i * nlp_stride)) {
+        if (!mshr->canIssue(page_addr + lineSize * i * nlp_stride, mreq->startClock)) {
           nHit++;  // Pending request == hit, line already requested
         } else if (cacheBank->findLineNoEffect(page_addr + lineSize * i * nlp_stride)) {
           nHit++;
@@ -712,10 +712,10 @@ void CCache::doReq(MemRequest *mreq) {
   if (retrying) {  // reissued operation
     mreq->clearRetrying();
     // GI(mreq->isPrefetch() , !pmshr->canIssue(addr)); // the req is already queued if retrying
-    GI(!mreq->isPrefetch(), !mshr->canIssue(addr));  // the req is already queued if retrying
+    GI(!mreq->isPrefetch(), !mshr->canIssue(addr, mreq->startClock));  // the req is already queued if retrying
     I(!mreq->isPrefetch());
   } else {
-    if (!mshr->canIssue(addr)) {
+    if (!mshr->canIssue(addr, mreq->startClock)) {
       MTRACE("doReq queued");
 
       if (mreq->isPrefetch()) {
@@ -765,7 +765,7 @@ void CCache::doReq(MemRequest *mreq) {
         delta = i * 67;
       }
       delta = delta * nlp_stride;
-      tryPrefetch(base + (delta * lineSize), mreq->has_stats(), i, PSIGN_NLINE, mreq->getPC());
+      tryPrefetch(base + (delta * lineSize), mreq->has_stats(), i, PSIGN_NLINE, mreq->getPC(), 0);
 #else
       tryPrefetch(base + (i * nlp_stride * lineSize), mreq->has_stats(), i, PSIGN_NLINE, mreq->getPC());
 #endif
@@ -895,6 +895,7 @@ void CCache::doReq(MemRequest *mreq) {
 
   MTRACE("doReq done  ID:{} @{}", mreq->getID(), when);
 
+  printf("030123-DEBUG: glbclk: %ld\n", globalClock);
   port.reqRetire(mreq);
   mshr->retire(addr, mreq);
 }
@@ -1227,7 +1228,7 @@ void CCache::tryPrefetch(Addr_t paddr, bool doStats, int degree, Addr_t pref_sig
     return;
   }
 
-  if (!mshr->canIssue(paddr)) {
+  if (!mshr->canIssue(paddr, 0)) {
     nPrefetchHitPending.inc(doStats);
     if (cb) {
       cb->destroy();

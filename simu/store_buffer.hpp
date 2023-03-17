@@ -9,7 +9,6 @@
 #include "callback.hpp"
 #include "dinst.hpp"
 #include "opcode.hpp"
-#include "gmemory_system.hpp"
 
 class MemObj;  // To break circular dependencies
 
@@ -45,11 +44,11 @@ public:
 
   bool is_clean() const { return state == State::Clean; }
   bool is_waiting_wb() const { return state == State::Uncoherent; }
-
 };
 
 class Store_buffer {
-protected:
+//protected:
+public:
   MemObj* dl1;
 
   // FA structure, so a map is fine
@@ -69,15 +68,12 @@ protected:
 public:
   void ownership_done(Addr_t addr);
   using ownership_doneCB = CallbackMember1<Store_buffer, Addr_t, &Store_buffer::ownership_done>;
-  
-  Store_buffer(Hartid_t hid, std::shared_ptr<Gmemory_system> ms);
-  ~Store_buffer() {}
 
+  Store_buffer(Hartid_t hid);
+  ~Store_buffer() {}
 
   bool can_accept_st(Addr_t st_addr) const;
   void add_st(Dinst* dinst);
 
   bool is_ld_forward(Addr_t ld_addr) const;
-
 };
-

@@ -40,3 +40,14 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_test(
+    name = "mshr_test_v2",
+    srcs = [
+        "mshr_test_v2.cpp",
+    ],
+    deps = [
+        ":mem",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
